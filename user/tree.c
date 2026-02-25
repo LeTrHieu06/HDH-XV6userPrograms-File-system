@@ -65,8 +65,9 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
     for(int i = 0; i < count; i++){
         char buf[512];
         strcpy(buf, path);
-        strcat(buf, "/");
-        strcat(buf, entries[i].name);
+        char *p = buf + strlen(buf);
+        *p++ = '/';
+        strcpy(p, entries[i].name);
 
         struct stat childst;
         if(stat(buf, &childst) < 0)
