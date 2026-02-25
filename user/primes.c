@@ -1,50 +1,53 @@
 #include "kernel/types.h"
 #include "user/user.h"
 
-// Moi lan goi sieve se:
-// 1. Doc so dau tien tu pipe -> do la so nguyen to
-// 2. Tao pipe moi, fork child de xu ly stage tiep
-// 3. Loc cac so con lai, gui sang pipe moi
 void
 sieve(int read_fd)
 {
-  int num;
+  int prime, next;
+  int buf[280]; // mang tam de chua so da loc
+  int count;
 
-  // doc so dau tien
-  if (read(read_fd, &num, sizeof(int)) <= 0) {
-    close(read_fd);
-    exit(0);
-  }
+  while (1) {
+    // doc so dau tien = so nguyen to
+    if (read(read_fd, &prime, sizeof(int)) <= 0)
+      break;
 
-  printf("prime %d\n", num);
+    printf("prime %d\n", prime);
 
-  // tao pipe cho stage tiep theo
-  int p[2];
-  pipe(p);
-
-  int pid = fork();
-
-  if (pid == 0) {
-    // child: xu ly stage tiep
-    close(p[1]);
-    sieve(p[0]);
-
-  } else {
-    // parent: loc va chuyen so sang pipe moi
-    close(p[0]);
-
-    int next;
+    // doc tat ca so con lai va loc bo boi cua prime
+    count = 0;
     while (read(read_fd, &next, sizeof(int)) > 0) {
-      if (next % num != 0) {
-        write(p[1], &next, sizeof(int));
-      }
+      if (next % prime != 0)
+        buf[count++] = next;
+    }
+    close(read_fd);
+
+    if (count == 0)
+      break;
+
+    // tao pipe moi, fork child de ghi so da loc vao pipe
+    int p[2];
+    pipe(p);
+
+    if (fork() == 0) {
+      // child: ghi so vao pipe roi thoat
+      close(p[0]);
+      for (int i = 0; i < count; i++)
+        write(p[1], &buf[i], sizeof(int));
+      close(p[1]);
+      exit(0);
     }
 
-    close(read_fd);
+    // parent: doc tu pipe moi o vong lap tiep theo
     close(p[1]);
-    wait(0);
-    exit(0);
+    read_fd = p[0];
+    // khong wait o day, de parent doc pipe khong bi deadlock
   }
+
+  close(read_fd);
+  while (wait(0) >= 0); // doi tat ca child ket thuc
+  exit(0);
 }
 
 int
@@ -53,21 +56,15 @@ main()
   int p[2];
   pipe(p);
 
-  int pid = fork();
-
-  if (pid == 0) {
-    // child: bat dau pipeline sieve
+  if (fork() == 0) {
+    // child: bat dau sieve
     close(p[1]);
     sieve(p[0]);
-
   } else {
     // parent: dua so 2 den 280 vao pipe
     close(p[0]);
-
-    for (int i = 2; i <= 280; i++) {
+    for (int i = 2; i <= 280; i++)
       write(p[1], &i, sizeof(int));
-    }
-
     close(p[1]);
     wait(0);
     exit(0);
