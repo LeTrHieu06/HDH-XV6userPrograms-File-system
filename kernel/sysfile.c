@@ -356,10 +356,13 @@ sys_open(void)
     f->type = FD_INODE;
     f->off = 0;
   }
+  
   f->ip = ip;
+  if((omode & O_APPEND) && ip->type == T_FILE){
+  f->off = ip->size;
+}
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
-
   if((omode & O_TRUNC) && ip->type == T_FILE){
     itrunc(ip);
   }
