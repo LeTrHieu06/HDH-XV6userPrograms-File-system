@@ -1,9 +1,18 @@
 #include "kernel/types.h"
 #include "user/user.h"
 
-int main() {
-printf("Sleeping for 100 ticks...\n");
-sleep(100); // ngủ khoảng 1 giây
-printf("Woke up!\n");
-exit(0);
+int
+main(int argc, char *argv[])
+{
+  // kiem tra thieu doi so
+  if (argc < 2) {
+    fprintf(2, "Usage: sleep <ticks>\n");
+    exit(1);
+  }
+
+  // doi chuoi sang so bang atoi, goi sleep
+  int ticks = atoi(argv[1]);
+  sleep(ticks);
+
+  exit(0);
 }
