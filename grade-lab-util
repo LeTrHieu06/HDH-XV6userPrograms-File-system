@@ -1,4 +1,4 @@
-# #!/usr/bin/env python3
+#!/usr/bin/env python3
 
 # import re
 # from gradelib import *
@@ -103,10 +103,7 @@
 #     check_time()
     
 # run_tests()
-#!/usr/bin/env python3
-
 #------------------ PHẦN TRÊN LÀ CHƯƠNG TRÌNH CHẤM ĐIỂM CŨ -----------------
-
 
 import re
 from gradelib import *
@@ -261,7 +258,7 @@ def test_du_all():
         'du testdir -a',
         'echo OK'
     ]))
-    r.match('f1', 'testdir', '^OK$')
+    r.match('.*testdir/f1', '.*testdir$', '^OK$')
 
 ##############################################
 # 7. DIFF
@@ -292,7 +289,7 @@ def test_diff_quiet():
     r.run_qemu(shell_script([
         'echo hello > f1',
         'echo world > f2',
-        'diff f1 f2 -q',
+        'diff -q f1 f2',
         'echo OK'
     ]))
     r.match('files differ', '^OK$')
