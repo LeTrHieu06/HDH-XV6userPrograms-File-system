@@ -1,20 +1,28 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "kernel/fs.h"
-#include "kernel/fcntl.h"
 #include "user/user.h"
 
 #define MAX_DEPTH 50
 
 int last[MAX_DEPTH];  
 
+char* get_basename(char *path)
+{
+  char *p;
+  for(p = path + strlen(path); p >= path && *p != '/'; p--)
+    ;
+  p++;
+  return p;
+}
+
 void print_prefix(int level)
 {
   for(int i = 0; i < level; i++){
     if(last[i])
-      printf("    ");
+      printf("    "); 
     else
-      printf("│   ");
+      printf("|   "); 
   }
 }
 
@@ -26,25 +34,28 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
   int fd;
   struct stat st;
 
-  if((fd = open(path, 0)) < 0)
+  if((fd = open(path, 0)) < 0) {
+    fprintf(2, "tree: cannot open %s\n", path);
     return;
+  }
 
   if(fstat(fd, &st) < 0){
+    fprintf(2, "tree: cannot stat %s\n", path);
     close(fd);
     return;
   }
 
   if(level == 0){
-    printf("%s\n", path);
+    printf("%s\n", path); 
   } else {
     print_prefix(level - 1);
     if(last[level - 1])
-      printf("└── %s\n", path);
+      printf("`-- %s\n", get_basename(path));
     else
-      printf("├── %s\n", path);
+      printf("|-- %s\n", get_basename(path));
   }
 
-  if(st.type != T_DIR){
+  if(st.type != T_DIR || level == maxDepth){
     close(fd);
     return;
   }
@@ -109,6 +120,7 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
       continue;
 
     last[level] = (index == total - 1);
+
     tree(buf, level + 1, maxDepth, onlyDir);
     index++;
   }
@@ -118,7 +130,7 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
 
 int main(int argc, char *argv[])
 {
-  char *path = ".";
+  char *path = "."; 
   int maxDepth = 1000;
   int onlyDir = 0;
 
