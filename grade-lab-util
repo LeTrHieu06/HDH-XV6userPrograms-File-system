@@ -1,9 +1,121 @@
+# #!/usr/bin/env python3
+
+# import re
+# from gradelib import *
+
+# r = Runner(save("xv6.out"))
+
+# @test(5, "sleep, no arguments")
+# def test_sleep_no_args():
+#     r.run_qemu(shell_script([
+#         'sleep'
+#     ]))
+#     r.match(no=["exec .* failed", "$ sleep\n$"])
+
+# @test(5, "sleep, returns")
+# def test_sleep_no_args():
+#     r.run_qemu(shell_script([
+#         'sleep',
+#         'echo OK'
+#     ]))
+#     r.match('^OK$', no=["exec .* failed", "$ sleep\n$"])
+
+# @test(10, "sleep, makes syscall")
+# def test_sleep():
+#     r.run_qemu(shell_script([
+#         'sleep 10',
+#         'echo FAIL'
+#     ]), stop_breakpoint('sys_sleep'))
+#     r.match('\\$ sleep 10', no=['FAIL'])
+
+# @test(20, "pingpong")
+# def test_pingpong():
+#     r.run_qemu(shell_script([
+#         'pingpong', 'echo OK'
+#     ]))
+#     r.match('^\\d+: received ping$', '^\\d+: received pong$', '^OK$')
+
+# @test(20, "primes")
+# def test_primes():
+#     r.run_qemu(shell_script([
+#         'primes', 'echo OK'
+#     ]))
+#     args = ['prime %d' % i for i in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269]]
+#     args.append('^OK$')
+#     r.match(*args)
+
+# @test(10, "find, in current directory")
+# def test_find_curdir():
+#     fn = random_str()
+#     r.run_qemu(shell_script([
+#         'echo > %s' % fn,
+#         'find . %s' % fn
+#     ]))
+#     r.match('./%s' % fn)
+#     r.match(no=["./README", "README"])
+
+# @test(10, "find, in sub-directory")
+# def test_find_curdir():
+#     dd = random_str()
+#     fn = random_str()
+#     r.run_qemu(shell_script([
+#         'echo > %s' % fn,
+#         'mkdir %s' % dd,
+#         'echo > %s/%s' % (dd, fn),
+#         'find %s %s' % (dd, fn)
+#     ]))
+#     r.match('%s/%s' % (dd, fn))
+#     r.match(no=['./%s' % fn])
+
+# @test(10, "find, recursive")
+# def test_find_recursive():
+#     needle = random_str()
+#     dirs = [random_str() for _ in range(3)]
+#     r.run_qemu(shell_script([
+#         'mkdir %s' % dirs[0],
+#         'echo > %s/%s' % (dirs[0], needle),
+#         'mkdir %s/%s' % (dirs[0], dirs[1]),
+#         'echo > %s/%s/%s' % (dirs[0], dirs[1], needle),
+#         'mkdir %s' % dirs[2],
+#         'echo > %s/%s' % (dirs[2], needle),
+#         'find . %s' % needle
+#     ]))
+#     r.match('./%s/%s' % (dirs[0], needle),
+#             './%s/%s/%s' % (dirs[0], dirs[1], needle),
+#             './%s/%s' % (dirs[2], needle))
+
+# @test(10, "xargs")
+# def test_xargs():
+#     r.run_qemu(shell_script([
+#         'sh < xargstest.sh',
+#         'echo DONE',
+#     ], 'DONE'))
+#     matches = re.findall("hello", r.qemu.output)
+#     assert_equal(len(matches), 3, "Number of appearances of 'hello'")
+
+# @test(9, "xargs, multi-line echo")
+# def test_xargs_multiline():
+#     r.run_qemu(shell_script(['(echo 1 ; echo 2) | xargs echo']))
+#     r.match('^1$', '^2$')
+
+# @test(1, "time")
+# def test_time():
+#     check_time()
+    
+# run_tests()
 #!/usr/bin/env python3
+
+#------------------ PHẦN TRÊN LÀ CHƯƠNG TRÌNH CHẤM ĐIỂM CŨ -----------------
+
 
 import re
 from gradelib import *
 
 r = Runner(save("xv6.out"))
+
+##############################################
+# 1. SLEEP
+##############################################
 
 @test(5, "sleep, no arguments")
 def test_sleep_no_args():
@@ -13,14 +125,14 @@ def test_sleep_no_args():
     r.match(no=["exec .* failed", "$ sleep\n$"])
 
 @test(5, "sleep, returns")
-def test_sleep_no_args():
+def test_sleep_returns():
     r.run_qemu(shell_script([
         'sleep',
         'echo OK'
     ]))
     r.match('^OK$', no=["exec .* failed", "$ sleep\n$"])
 
-@test(10, "sleep, makes syscall")
+@test(5, "sleep, makes syscall")
 def test_sleep():
     r.run_qemu(shell_script([
         'sleep 10',
@@ -28,78 +140,165 @@ def test_sleep():
     ]), stop_breakpoint('sys_sleep'))
     r.match('\\$ sleep 10', no=['FAIL'])
 
-@test(20, "pingpong")
+##############################################
+# 2. PINGPONG
+##############################################
+
+@test(10, "pingpong")
 def test_pingpong():
     r.run_qemu(shell_script([
         'pingpong', 'echo OK'
     ]))
     r.match('^\\d+: received ping$', '^\\d+: received pong$', '^OK$')
 
-@test(20, "primes")
+##############################################
+# 3. PRIMES
+##############################################
+
+@test(10, "primes")
 def test_primes():
     r.run_qemu(shell_script([
         'primes', 'echo OK'
     ]))
-    args = ['prime %d' % i for i in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269]]
+    args = ['prime %d' % i for i in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
+            31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+            101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157,
+            163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227,
+            229, 233, 239, 241, 251, 257, 263, 269, 277]]
     args.append('^OK$')
     r.match(*args)
 
-@test(10, "find, in current directory")
-def test_find_curdir():
-    fn = random_str()
+##############################################
+# 4. CP
+##############################################
+
+@test(5, "cp, copy file")
+def test_cp_basic():
     r.run_qemu(shell_script([
-        'echo > %s' % fn,
-        'find . %s' % fn
+        'echo hello > a',
+        'cp a b',
+        'cat b'
     ]))
-    r.match('./%s' % fn)
-    r.match(no=["./README", "README"])
+    r.match('^hello$')
 
-@test(10, "find, in sub-directory")
-def test_find_curdir():
-    dd = random_str()
-    fn = random_str()
+@test(5, "cp, missing arguments")
+def test_cp_no_args():
     r.run_qemu(shell_script([
-        'echo > %s' % fn,
-        'mkdir %s' % dd,
-        'echo > %s/%s' % (dd, fn),
-        'find %s %s' % (dd, fn)
+        'cp a',
+        'echo OK'
     ]))
-    r.match('%s/%s' % (dd, fn))
-    r.match(no=['./%s' % fn])
+    r.match('usage: cp src dst', '^OK$')
 
-@test(10, "find, recursive")
-def test_find_recursive():
-    needle = random_str()
-    dirs = [random_str() for _ in range(3)]
+@test(5, "cp, source not found")
+def test_cp_nofile():
     r.run_qemu(shell_script([
-        'mkdir %s' % dirs[0],
-        'echo > %s/%s' % (dirs[0], needle),
-        'mkdir %s/%s' % (dirs[0], dirs[1]),
-        'echo > %s/%s/%s' % (dirs[0], dirs[1], needle),
-        'mkdir %s' % dirs[2],
-        'echo > %s/%s' % (dirs[2], needle),
-        'find . %s' % needle
+        'cp nofile out',
+        'echo OK'
     ]))
-    r.match('./%s/%s' % (dirs[0], needle),
-            './%s/%s/%s' % (dirs[0], dirs[1], needle),
-            './%s/%s' % (dirs[2], needle))
+    r.match('cp: cannot open nofile', '^OK$')
 
-@test(10, "xargs")
-def test_xargs():
+##############################################
+# 5. TREE
+##############################################
+
+@test(5, "tree, basic")
+def test_tree_basic():
     r.run_qemu(shell_script([
-        'sh < xargstest.sh',
-        'echo DONE',
-    ], 'DONE'))
-    matches = re.findall("hello", r.qemu.output)
-    assert_equal(len(matches), 3, "Number of appearances of 'hello'")
+        'mkdir a',
+        'echo hi > a/b',
+        'tree .',
+        'echo OK'
+    ]))
+    r.match('\\|-- a', '^OK$')
 
-@test(9, "xargs, multi-line echo")
-def test_xargs_multiline():
-    r.run_qemu(shell_script(['(echo 1 ; echo 2) | xargs echo']))
-    r.match('^1$', '^2$')
+@test(5, "tree, depth limit")
+def test_tree_depth():
+    r.run_qemu(shell_script([
+        'mkdir a',
+        'mkdir a/aa',
+        'echo hi > a/aa/c',
+        'tree . -L 1',
+        'echo OK'
+    ]))
+    r.match('\\|-- a', '^OK$', no=['aa', '\\bc\\b'])
+
+@test(5, "tree, only directories")
+def test_tree_dirs_only():
+    r.run_qemu(shell_script([
+        'mkdir a',
+        'echo hi > a/b',
+        'mkdir a/aa',
+        'tree . -d',
+        'echo OK'
+    ]))
+    r.match('\\|-- a', 'aa', '^OK$', no=['\\bb\\b'])
+
+##############################################
+# 6. DU
+##############################################
+
+@test(5, "du, basic")
+def test_du_basic():
+    r.run_qemu(shell_script([
+        'du .',
+        'echo OK'
+    ]))
+    r.match('\\d+.*\\.', '^OK$')
+
+@test(5, "du, summary mode")
+def test_du_summary():
+    r.run_qemu(shell_script([
+        'du . -s',
+        'echo OK'
+    ]))
+    r.match('\\d+', '^OK$')
+
+@test(5, "du, all files")
+def test_du_all():
+    r.run_qemu(shell_script([
+        'mkdir testdir',
+        'echo hi > testdir/f1',
+        'du testdir -a',
+        'echo OK'
+    ]))
+    r.match('f1', 'testdir', '^OK$')
+
+##############################################
+# 7. DIFF
+##############################################
+
+@test(5, "diff, identical files")
+def test_diff_identical():
+    r.run_qemu(shell_script([
+        'echo hello > f1',
+        'echo hello > f2',
+        'diff f1 f2',
+        'echo OK'
+    ]))
+    r.match('^OK$', no=['<', '>'])
+
+@test(5, "diff, different files")
+def test_diff_different():
+    r.run_qemu(shell_script([
+        'echo hello > f1',
+        'echo world > f2',
+        'diff f1 f2',
+        'echo OK'
+    ]))
+    r.match('^OK$')
+
+@test(5, "diff, quiet mode")
+def test_diff_quiet():
+    r.run_qemu(shell_script([
+        'echo hello > f1',
+        'echo world > f2',
+        'diff f1 f2 -q',
+        'echo OK'
+    ]))
+    r.match('files differ', '^OK$')
 
 @test(1, "time")
 def test_time():
     check_time()
-    
+
 run_tests()
