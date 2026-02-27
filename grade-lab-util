@@ -222,13 +222,13 @@ def test_tree_depth():
 @test(5, "tree, only directories")
 def test_tree_dirs_only():
     r.run_qemu(shell_script([
-        'mkdir a',
-        'echo hi > a/b',
-        'mkdir a/aa',
+        'mkdir a1',
+        'echo hi > a1/b1',
+        'mkdir a1/aa1',
         'tree . -d',
         'echo OK'
     ]))
-    r.match('\\|-- a', 'aa', '^OK$', no=['\\bb\\b'])
+    r.match('\\|-- a1', '|   |-- aa1', '^OK$', no=['\\bb\\b'])
 
 ##############################################
 # 6. DU

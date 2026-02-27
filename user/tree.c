@@ -5,25 +5,18 @@
 
 #define MAX_DEPTH 50
 
-int last[MAX_DEPTH];  
-
 char* get_basename(char *path)
 {
   char *p;
   for(p = path + strlen(path); p >= path && *p != '/'; p--)
     ;
-  p++;
-  return p;
+  return p + 1;
 }
 
 void print_prefix(int level)
 {
-  for(int i = 0; i < level; i++){
-    if(last[i])
-      printf("    "); 
-    else
-      printf("|   "); 
-  }
+  for(int i = 0; i < level; i++)
+    printf("|   ");
 }
 
 void tree(char *path, int level, int maxDepth, int onlyDir)
@@ -34,7 +27,7 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
   int fd;
   struct stat st;
 
-  if((fd = open(path, 0)) < 0) {
+  if((fd = open(path, 0)) < 0){
     fprintf(2, "tree: cannot open %s\n", path);
     return;
   }
@@ -45,14 +38,12 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
     return;
   }
 
+  // In node hiện tại
   if(level == 0){
-    printf("%s\n", path); 
+    printf("%s\n", path);
   } else {
     print_prefix(level - 1);
-    if(last[level - 1])
-      printf("`-- %s\n", get_basename(path));
-    else
-      printf("|-- %s\n", get_basename(path));
+    printf("|-- %s\n", get_basename(path));
   }
 
   if(st.type != T_DIR || level == maxDepth){
@@ -61,11 +52,11 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
   }
 
   struct dirent de;
-  int total = 0;
 
   while(read(fd, &de, sizeof(de)) == sizeof(de)){
     if(de.inum == 0)
       continue;
+
     if(strcmp(de.name, ".") == 0 || strcmp(de.name, "..") == 0)
       continue;
 
@@ -85,44 +76,8 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
 
     if(onlyDir && childst.type != T_DIR)
       continue;
-
-    total++;
-  }
-
-  close(fd);
-
-  if((fd = open(path, 0)) < 0)
-    return;
-
-  int index = 0;
-
-  while(read(fd, &de, sizeof(de)) == sizeof(de)){
-    if(de.inum == 0)
-      continue;
-    if(strcmp(de.name, ".") == 0 || strcmp(de.name, "..") == 0)
-      continue;
-
-    char buf[512];
-    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof(buf))
-      continue;
-
-    strcpy(buf, path);
-    char *p = buf + strlen(buf);
-    *p++ = '/';
-    memmove(p, de.name, DIRSIZ);
-    p[DIRSIZ] = 0;
-
-    struct stat childst;
-    if(stat(buf, &childst) < 0)
-      continue;
-
-    if(onlyDir && childst.type != T_DIR)
-      continue;
-
-    last[level] = (index == total - 1);
 
     tree(buf, level + 1, maxDepth, onlyDir);
-    index++;
   }
 
   close(fd);
@@ -130,7 +85,7 @@ void tree(char *path, int level, int maxDepth, int onlyDir)
 
 int main(int argc, char *argv[])
 {
-  char *path = "."; 
+  char *path = ".";
   int maxDepth = 1000;
   int onlyDir = 0;
 
