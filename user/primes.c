@@ -1,6 +1,8 @@
 #include "kernel/types.h"
 #include "user/user.h"
 
+void sieve(int read_fd) __attribute__((noreturn));
+
 void
 sieve(int read_fd)
 {
