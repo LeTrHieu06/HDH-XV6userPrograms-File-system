@@ -54,7 +54,7 @@ main(int argc, char *argv[])
 
   char line1[MAXLINE], line2[MAXLINE];
   int lineno = 1;
-  int different = 0;
+  int any_different = 0; // theo dõi tổng thể có khác nhau không
 
   while(1){
     int r1 = readline(fd1, line1);
@@ -62,6 +62,9 @@ main(int argc, char *argv[])
 
     if(!r1 && !r2)
       break;
+
+    // Reset mỗi vòng lặp: chỉ kiểm tra dòng HIỆN TẠI
+    int different = 0;
 
     if(r1 && r2){
       if(strcmp(line1, line2) != 0)
@@ -72,6 +75,8 @@ main(int argc, char *argv[])
     }
 
     if(different){
+      any_different = 1;
+
       if(quiet){
         printf("files differ\n");
         close(fd1);
@@ -99,8 +104,8 @@ main(int argc, char *argv[])
   close(fd1);
   close(fd2);
 
-  if(quiet && !different)
+  if(quiet && !any_different)
     exit(0);
 
-  exit(different);
+  exit(any_different);
 }
